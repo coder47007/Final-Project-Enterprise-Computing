@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         // AWS variables
-        AWS_ACCOUNT_ID = 'YOUR_AWS_ACCOUNT_ID' // Replace with your AWS Account ID!
+        AWS_ACCOUNT_ID = '518647659327' // Your AWS Account ID
         AWS_DEFAULT_REGION = 'us-east-1' // Adjust region if needed!
         ECR_REPO = "group-4-react-app" 
         IMAGE_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPO}:latest"
