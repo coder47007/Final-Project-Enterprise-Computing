@@ -8,10 +8,9 @@ function App() {
         <h1>Group 4</h1>
         <h2>Team Members:</h2>
         <ul>
-          <li>[Member Name 1]</li>
-          <li>[Member Name 2]</li>
-          <li>[Member Name 3]</li>
-          <li>[Member Name 4]</li>
+          <li>[Shamsuddin ]</li>
+          <li>[Salim Fraj]</li>
+
         </ul>
       </header>
     </div>
