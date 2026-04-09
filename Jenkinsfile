@@ -2,48 +2,52 @@ pipeline {
     agent any
 
     environment {
-        // AWS variables
-        AWS_ACCOUNT_ID = '518647659327' // Your AWS Account ID
-        AWS_DEFAULT_REGION = 'us-east-1' // Adjust region if needed!
-        ECR_REPO = "group-4-react-app" 
-        IMAGE_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPO}:latest"
-        AWS_CREDENTIALS_ID = 'aws-credentials' // This maps to the Jenkins credentials ID we will create
+        AWS_ACCOUNT_ID = '518647659327'
+        AWS_DEFAULT_REGION = 'us-east-2'
+        IMAGE_NAME = 'group-4-react-app'
+        REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_NAME}"
     }
 
     stages {
         stage('Build') {
             steps {
-                echo 'Building the React Application...'
-                bat 'npm install'
-                bat 'npm run build'
+                echo 'Building the React App...'
+                bat 'npm install --force'
             }
         }
-        
         stage('Test') {
             steps {
-                echo 'Running tests...'
-                bat 'set CI=true&& npm test'
+                echo 'Testing the React App...'
+                bat 'set CI=true && npm test'
             }
         }
-        
         stage('Build My Docker Image') {
             steps {
-                echo 'Building Docker image...'
-                script {
-                    dockerImage = docker.build("${IMAGE_URI}")
+                echo 'Building and pushing Docker image to AWS ECR...'
+                withCredentials([[
+                    $class: 'UsernamePasswordMultiBinding',
+                    credentialsId: 'aws-credentials',
+                    usernameVariable: 'AWS_ACCESS_KEY_ID',
+                    passwordVariable: 'AWS_SECRET_ACCESS_KEY'
+                ]]) {
+                    bat "aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
+                    bat "docker build -t ${IMAGE_NAME} ."
+                    bat "docker tag ${IMAGE_NAME}:latest ${REPOSITORY_URI}:latest"
+                    bat "docker push ${REPOSITORY_URI}:latest"
                 }
-                
-                echo 'Logging into AWS ECR & Pushing...'
-                withCredentials([
-                    [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: env.AWS_CREDENTIALS_ID]
-                ]) {
-                    // Logs docker CLI into AWS ECR using an AWS CLI Docker container
-                    bat "docker run --rm -e AWS_ACCESS_KEY_ID=%AWS_ACCESS_KEY_ID% -e AWS_SECRET_ACCESS_KEY=%AWS_SECRET_ACCESS_KEY% -e AWS_SESSION_TOKEN=%AWS_SESSION_TOKEN% amazon/aws-cli ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
-                    
-                    echo 'Pushing Docker image to ECR...'
-                    script {
-                        dockerImage.push()
-                    }
+            }
+        }
+        stage('Deploy to AWS') {
+            steps {
+                echo 'Deploying to AWS ECS Fargate...'
+                withCredentials([[
+                    $class: 'UsernamePasswordMultiBinding',
+                    credentialsId: 'aws-credentials',
+                    usernameVariable: 'AWS_ACCESS_KEY_ID',
+                    passwordVariable: 'AWS_SECRET_ACCESS_KEY'
+                ]]) {
+                    bat "aws ecs register-task-definition --cli-input-json file://task-definition.json --region ${AWS_DEFAULT_REGION}"
+                    bat "aws ecs update-service --cluster group-4-cluster --service group-4-service --force-new-deployment --region ${AWS_DEFAULT_REGION}"
                 }
             }
         }
