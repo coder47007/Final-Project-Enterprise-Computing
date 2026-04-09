@@ -1,4 +1,3 @@
-import logo from './logo.svg';
 import './App.css';
 
 function App() {
@@ -8,9 +7,8 @@ function App() {
         <h1>Group 4</h1>
         <h2>Team Members:</h2>
         <ul>
-          <li>[Shamsuddin ]</li>
-          <li>[Salim Fraj]</li>
-
+          <li>Shamsuddin</li>
+          <li>Salim Fraj</li>
         </ul>
       </header>
     </div>
