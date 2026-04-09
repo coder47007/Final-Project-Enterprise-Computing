@@ -1,17 +1,17 @@
 {
-  "family": "group-4-react-task",
+  "family": "group-4-react-app",
   "networkMode": "awsvpc",
   "requiresCompatibilities": [
     "FARGATE"
   ],
   "cpu": "256",
   "memory": "512",
-  "executionRoleArn": "arn:aws:iam::<YOUR_AWS_ACCOUNT_ID>:role/ecsTaskExecutionRole",
-  "taskRoleArn": "arn:aws:iam::<YOUR_AWS_ACCOUNT_ID>:role/ecsTaskExecutionRole",
+  "executionRoleArn": "arn:aws:iam::518647659327:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::518647659327:role/ecsTaskExecutionRole",
   "containerDefinitions": [
     {
       "name": "react-app-container",
-      "image": "<IMAGE_URI>",
+      "image": "518647659327.dkr.ecr.us-east-2.amazonaws.com/group-4-react-app:latest",
       "essential": true,
       "portMappings": [
         {
@@ -19,15 +19,7 @@
           "hostPort": 80,
           "protocol": "tcp"
         }
-      ],
-      "logConfiguration": {
-        "logDriver": "awslogs",
-        "options": {
-          "awslogs-group": "/ecs/group-4-react-task",
-          "awslogs-region": "us-east-1",
-          "awslogs-stream-prefix": "ecs"
-        }
-      }
+      ]
     }
   ]
 }
